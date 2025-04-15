@@ -11,25 +11,13 @@ class DataRune {
 		category: 'Sampling',
 		datasetId: [] as number[],
 		matrix: [] as string[],
-		yearMin: null as number | null,
-		yearMax: null as number | null,
+		yearMin: 2000 as number | null,
+		yearMax: 2025 as number | null,
+		yearRange: [2000, 2025] as number[],
 		substances: [] as string[],
 		nutsRegions: [] as { year: number; level: number; id: string }[]
 	});
 	
-	yearRange = $derived(() => {
-		const filtered = this.points.filter(p =>
-			this.filters.category === 'Sampling'
-		);
-
-		const years = filtered
-			.map(p => p.year)
-			.filter((y): y is number => typeof y === 'number');
-
-		if (years.length === 0) return [null, null];
-
-		return [Math.min(...years), Math.max(...years)];
-	});
 	
 	availableOptions = $derived(() => {
 		const currentCategory = this.filters.category;
@@ -99,8 +87,8 @@ class DataRune {
 			const matchMatrix = f.matrix.length === 0 || f.matrix.includes(p.matrix ?? '');
 			const matchYear =
 				f.category !== 'Sampling' ||
-				((!f.yearMin || Number(p.year) >= f.yearMin) &&
-					(!f.yearMax || Number(p.year) <= f.yearMax));
+				((!f.yearRange[0] || Number(p.year) >= f.yearRange[0]) &&
+					(!f.yearRange[1] || Number(p.year) <= f.yearRange[1]));
 
 			let matchSubstance = true;
 			if (f.substances.length > 0) {

@@ -29,7 +29,7 @@
         return dataRune.filters[field].length === 0;
     }
 
-    $inspect(dataRune.yearRange());
+    $inspect(dataRune.filters.yearRange);
 </script>
 
 <div class="selection">
@@ -155,32 +155,51 @@
 
     <!-- <Separator /> -->
 
-    <!-- Substances -->
-    <h2
-        class="scroll-m-20 border-b pt-3 pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0"
-    >
-        Substances
-    </h2>
-    <div class="checkbox-scroll">
-        <label>
-            <input
-                type="checkbox"
-                checked={isAllSelected("substances")}
-                onchange={() => toggleSelectAll("substances")}
+    {#if dataRune.filters.category === "Sampling"}
+        <h2
+            class="scroll-m-20 border-b pt-3 pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0"
+        >
+            Year range
+        </h2>
+        <div class="my-4 space-y-2 pt-2">
+            <Slider
+                type="multiple"
+                bind:value={dataRune.filters.yearRange}
+                min={2000}
+                max={2025}
+                step={1}
             />
-            Toutes
-        </label>
-        {#each dataRune.allSubstances() as substance}
+        </div>
+    {/if}
+
+    <!-- Substances -->
+    {#if dataRune.filters.category === "Sampling"}
+        <h2
+            class="scroll-m-20 border-b pt-3 pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0"
+        >
+            Substances
+        </h2>
+        <div class="checkbox-scroll">
             <label>
                 <input
                     type="checkbox"
-                    value={substance}
-                    bind:group={dataRune.filters.substances}
+                    checked={isAllSelected("substances")}
+                    onchange={() => toggleSelectAll("substances")}
                 />
-                {substance}
+                Toutes
             </label>
-        {/each}
-    </div>
+            {#each dataRune.allSubstances() as substance}
+                <label>
+                    <input
+                        type="checkbox"
+                        value={substance}
+                        bind:group={dataRune.filters.substances}
+                    />
+                    {substance}
+                </label>
+            {/each}
+        </div>
+    {/if}
 
     <Separator />
 

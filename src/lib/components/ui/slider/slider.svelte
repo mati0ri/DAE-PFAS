@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { Slider as SliderPrimitive, type WithoutChildrenOrChild } from "bits-ui";
+	import {
+		Slider as SliderPrimitive,
+		type WithoutChildrenOrChild,
+	} from "bits-ui";
 	import { cn } from "$lib/utils.js";
 
 	let {
@@ -21,7 +24,7 @@ get along, so we shut typescript up by casting `value` to `never`.
 	{orientation}
 	class={cn(
 		"relative flex touch-none select-none items-center data-[orientation='vertical']:h-full data-[orientation='vertical']:min-h-44 data-[orientation='horizontal']:w-full data-[orientation='vertical']:w-auto data-[orientation='vertical']:flex-col",
-		className
+		className,
 	)}
 	{...restProps}
 >
@@ -37,8 +40,18 @@ get along, so we shut typescript up by casting `value` to `never`.
 		{#each thumbs as thumb (thumb)}
 			<SliderPrimitive.Thumb
 				index={thumb}
-				class="border-primary bg-background ring-offset-background focus-visible:ring-ring block size-5 rounded-full border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-			/>
+				class="relative border-primary bg-background ring-offset-background focus-visible:ring-ring block size-5 rounded-full border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+			>
+				<!-- Valeur au-dessus du thumb -->
+				{#if Array.isArray(value)}
+					<div
+						class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground pointer-events-none select-none"
+					>
+						{value[thumb]}
+					</div>
+				{/if}
+				
+			</SliderPrimitive.Thumb>
 		{/each}
 	{/snippet}
 </SliderPrimitive.Root>

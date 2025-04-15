@@ -242,23 +242,4 @@
     .region-list {
         width: 100%;
     }
-
-    .region-list ul {
-        margin: 0;
-        padding-left: 1rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .region-list button {
-        background: none;
-        border: none;
-        color: hsl(var(--primary));
-        cursor: pointer;
-    }
-
-    .region-list button:hover {
-        text-decoration: underline;
-    }
 </style>
