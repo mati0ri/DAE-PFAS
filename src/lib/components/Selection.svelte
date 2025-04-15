@@ -31,7 +31,7 @@
         return dataRune.filters[field].length === 0;
     }
 
-    $inspect(dataRune.filters.yearRange);
+    $inspect(dataRune.filters.lassoSelection);
 </script>
 
 <div class="selection">

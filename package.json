@@ -35,6 +35,7 @@
 		"d3": "^7.9.0",
 		"html-to-image": "^1.11.13",
 		"leaflet": "^1.9.4",
+		"leaflet-lasso": "^2.2.13",
 		"lucide-svelte": "^0.488.0"
 	}
 }

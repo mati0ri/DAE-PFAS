@@ -18,7 +18,9 @@ class DataRune {
 		nutsRegions: [] as { year: number; level: number; id: string }[],
 		lassoSelection: [] as { lat: number; lon: number }[]
 	});
-	
+
+	lassoEnabled = $state(false);
+
 	
 	availableOptions = $derived(() => {
 		const currentCategory = this.filters.category;
@@ -110,6 +112,13 @@ class DataRune {
 					return nuts?.NUTS_ID === id;
 				});
 			}
+			if (f.lassoSelection.length > 0) {
+				matchRegion = f.lassoSelection.some(({ lat, lon }) => {
+					return Math.abs(Number(p.lat) - lat) < 0.0005 &&
+						   Math.abs(Number(p.lon) - lon) < 0.0005;
+				});
+			}
+			
 
 			return matchCategory &&
 				matchDataset &&

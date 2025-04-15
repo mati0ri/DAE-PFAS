@@ -4,13 +4,46 @@
     import { dataRune } from "$lib/runes/dataRune.svelte";
     import * as htmlToImage from "html-to-image";
     import { Button } from "$lib/components/ui/button/index";
-
+    import "leaflet-lasso";
     import { Map, Plus, Minus, ImageDown } from "lucide-svelte"; // icône de rafraîchissement
 
     let mapContainer: HTMLDivElement;
     let map: L.Map;
     let isLoading = $state(true);
     let L: typeof import("leaflet");
+
+    let lasso: any;
+
+    $effect(() => {
+        if (dataRune.lassoEnabled) {
+            if (map && !lasso) {
+                lasso = new (L as any).Lasso(map, {
+                    intersect: true,
+                    polygon: { color: "var(--primary)" },
+                });
+
+                map.on("lasso.finished", (event: any) => {
+                    const selected = (event.layers ?? event).map((layer: any) =>
+                        layer.getLatLng(),
+                    );
+
+                    dataRune.filters.lassoSelection = selected.map(
+                        ({ lat, lng }: { lat: number; lng: number }) => ({
+                            lat,
+                            lon: lng,
+                        }),
+                    );
+                });
+
+                lasso.enable();
+            }
+        } else if (lasso) {
+            lasso.disable();
+            map.off("lasso.finished");
+            lasso = null;
+            dataRune.filters.lassoSelection = [];
+        }
+    });
 
     export function invalidateMapSize() {
         // quand on resize, la map se recharge

@@ -95,7 +95,7 @@
                         : "var(--color-countries)",
                 );
             })
-            .on("click", (event, d: any) => {
+            .on("click", function (event, d: any) {
                 const element = this as SVGPathElement;
                 const id = d.properties.NUTS_ID;
 
@@ -104,7 +104,9 @@
                 } else {
                     selectedRegions = [...selectedRegions, id];
                 }
+
                 updateSelectedRegionsInRune();
+
                 d3.select(element).attr(
                     "fill",
                     selectedRegions.includes(id)
@@ -225,13 +227,16 @@
             </p>
         {/if}
     </div>
-    <!-- UI Lasso (exemple simple pour l’instant) -->
+
+    <!-- UI Lasso -->
     {#if mode === "lasso"}
         <div class="mt-1">
-            <Button onclick={() => null}>
-                <LassoSelect class= "mr-0.5 size-4" />
-                Toggle lasso</Button
+            <Button
+                onclick={() => (dataRune.lassoEnabled = !dataRune.lassoEnabled)}
             >
+                <LassoSelect class="mr-0.5 size-4" />
+                {dataRune.lassoEnabled ? "Reset" : "Start"} lasso selection
+            </Button>
         </div>
     {/if}
 </div>
