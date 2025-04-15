@@ -113,23 +113,81 @@
                     renderer: canvasRenderer,
                 });
 
-                marker.bindPopup(`<strong>${point.name ?? "null"}</strong><br>
-					City: ${point.city ?? "null"}<br>
-					Country: ${point.country ?? "null"}<br>
-					Category: ${point.category ?? "null"}<br>
-					Type: ${point.type ?? "null"}<br>
-					Sector: ${point.sector ?? "null"}<br>
-					Source type: ${point.source_type ?? "null"}<br>
-					Collection: ${point.data_collection_method ?? "null"}<br>
-					Source: ${point.source_text ?? "null"}<br>
-					Dataset: ${point.dataset_name ?? "null"}<br>
-					PFAS values: ${point.pfas_values ?? "null"} ${point.unit ?? ""}<br>
-					PFAS sum: ${point.pfas_sum ?? "null"}<br>
-					Matrix: ${point.matrix ?? "null"}<br>
-					Date: ${point.date ?? "null"}<br>
-					Year: ${point.year ?? "null"}<br>
-					<a href="${point.source_url ?? "#"}" target="_blank" rel="noopener">Lien source</a>
-				`);
+                const parsedValues = (() => {
+                    try {
+                        return JSON.parse(point.pfas_values ?? "[]");
+                    } catch {
+                        return [];
+                    }
+                })();
+
+                const styleTable =
+                    "width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 0.5rem;";
+                const styleTh =
+                    "border: 1px solid #ccc; padding: 4px; background-color: #f9f9f9; text-align: left;";
+                const styleTd = "border: 1px solid #ccc; padding: 4px;";
+                const muted = "color: var(--muted); font-style: italic;";
+
+                const pfasTable = parsedValues.length
+                    ? `<table style="${styleTable}">
+		<thead>
+			<tr>
+				<th style="${styleTh}">Substance</th>
+				<th style="${styleTh}">Value</th>
+				<th style="${styleTh}">Unit</th>
+			</tr>
+		</thead>
+		<tbody>
+			${parsedValues
+                .map((v: any) => {
+                    const substance =
+                        v.substance ?? `<span style="${muted}">null</span>`;
+                    const value =
+                        v.value ??
+                        v.less_than ??
+                        `<span style="${muted}">null</span>`;
+                    const unit =
+                        v.unit ??
+                        point.unit ??
+                        `<span style="${muted}">null</span>`;
+                    return `<tr>
+						<td style="${styleTd}">${substance}</td>
+						<td style="${styleTd}">${value}</td>
+						<td style="${styleTd}">${unit}</td>
+					</tr>`;
+                })
+                .join("")}
+		</tbody>
+	</table>`
+                    : `<div style="${muted}">No PFAS values</div>`;
+
+                marker.bindPopup(`
+	<div style="font-family: sans-serif; font-size: 0.85rem;">
+		<h2 class="text-lg font-semibold mb-1">${point.name ?? `<span style="${muted}">null</span>`}</h2>
+		<div><strong>City:</strong> ${point.city ?? `<span style="${muted}">null</span>`}</div>
+		<div><strong>Country:</strong> ${point.country ?? `<span style="${muted}">null</span>`}</div>
+		<div><strong>Category:</strong> ${point.category ?? `<span style="${muted}">null</span>`}</div>
+		<div><strong>Type:</strong> ${point.type ?? `<span style="${muted}">null</span>`}</div>
+		<div><strong>Sector:</strong> ${point.sector ?? `<span style="${muted}">null</span>`}</div>
+		<div><strong>Source type:</strong> ${point.source_type ?? `<span style="${muted}">null</span>`}</div>
+		<div><strong>Collection:</strong> ${point.data_collection_method ?? `<span style="${muted}">null</span>`}</div>
+		<div><strong>Source:</strong> ${point.source_text ?? `<span style="${muted}">null</span>`}</div>
+		<div><strong>Dataset:</strong> [${point.dataset_id ?? `<span style="${muted}">null</span>`}] ${point.dataset_name ?? `<span style="${muted}">null</span>`}</div>
+		<div><strong>Matrix:</strong> ${point.matrix ?? `<span style="${muted}">null</span>`}</div>
+		<div><strong>Date:</strong> ${point.date ?? `<span style="${muted}">null</span>`}</div>
+		<div><strong>Year:</strong> ${point.year ?? `<span style="${muted}">null</span>`}</div>
+
+		${pfasTable}
+                <div style="margin-top: 0.4rem;"><strong>PFAS sum:</strong> ${point.pfas_sum ?? `<span style="${muted}">null</span>`}</div>
+
+		<div style="margin-top: 0.4rem;">
+			<a href="${point.source_url ?? "#"}" target="_blank" rel="noopener" class="text-blue-600 underline">
+				Lien source
+			</a>
+		</div>
+	</div>
+`);
+
                 marker.addTo(map);
             }
         }
@@ -156,7 +214,7 @@
             url: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
             attribution:
                 '&copy; <a href="https://carto.com/">CARTO</a> | OpenStreetMap',
-        }
+        },
     ];
 
     function switchTileLayer() {

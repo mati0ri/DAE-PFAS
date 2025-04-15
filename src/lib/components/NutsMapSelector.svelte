@@ -14,7 +14,7 @@
 
     async function loadAndRenderMap() {
         const nutsUrl = `/data/nuts/NUTS_${selectedYear}.geojson`;
-        const worldUrl = `/data/world2.geojson`;
+        const worldUrl = `/data/world.geojson`;
 
         selectedRegions = [];
         dataRune.filters.nutsRegions = [];
@@ -44,7 +44,7 @@
 
         const path = d3.geoPath().projection(projection);
 
-        // === 🌍 Ajout de la couche monde en fond ===
+        // === 🌍 Monde en fond ===
         svg.append("g")
             .attr("class", "world-background")
             .selectAll("path")
@@ -56,7 +56,7 @@
             .attr("stroke-width", 0.3)
             .attr("opacity", 0.4);
 
-        // === Couches NUTS ===
+        // === Couches interactives selon le niveau sélectionné ===
         const g = svg.append("g");
 
         const features = geojsonData.features.filter(
@@ -68,14 +68,13 @@
             .join("path")
             .attr("d", (d: any) => path(d) as string)
             .attr("data-id", (d: any) => d.properties.NUTS_ID)
-
             .attr("fill", (d: any) =>
                 selectedRegions.includes(d.properties.NUTS_ID)
                     ? "var(--primary)"
                     : "var(--color-countries)",
             )
-            .attr("stroke", "#444")
-            .attr("stroke-width", 0.6)
+            .attr("stroke", "#777")
+            .attr("stroke-width", 0.4)
             .attr("opacity", 0.85)
             .style("cursor", "pointer")
             .on("mouseover", function (event, d: any) {
@@ -87,7 +86,6 @@
                         : "var(--color-land-hover)",
                 );
             })
-
             .on("mouseout", function () {
                 d3.select(this).attr("fill", (d: any) =>
                     selectedRegions.includes(d.properties.NUTS_ID)
@@ -113,10 +111,31 @@
                 );
             });
 
+        // === NUTS 0 en fond (toujours visible) ===
+        svg.append("g")
+            .attr("class", "nuts0-background")
+            .selectAll("path")
+            .data(
+                geojsonData.features.filter(
+                    (f: any) => f.properties.LEVL_CODE === 0,
+                ),
+            )
+            .join("path")
+            .attr("d", (d: any) => path(d) as string)
+            .attr("fill", "none")
+            .attr("stroke", "#555")
+            .attr("stroke-width", 0.8)
+            .attr("pointer-events", "none")
+            .attr("opacity", 1);
+
         svg.call(
             d3.zoom<SVGSVGElement, unknown>().on("zoom", (event) => {
                 g.attr("transform", event.transform);
                 svg.select(".world-background").attr(
+                    "transform",
+                    event.transform,
+                );
+                svg.select(".nuts0-background").attr(
                     "transform",
                     event.transform,
                 );
@@ -143,7 +162,7 @@
     <h3
         class="scroll-m-20 border-b pt-3 pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0"
     >
-        Area restriction
+        Area selection
     </h3>
 
     <!-- Filtres NUTS -->
@@ -184,7 +203,9 @@
                     size="sm"
                     class="px-3 py-1 text-xs"
                     onclick={() => {
-                        selectedRegions = selectedRegions.filter((r) => r !== region);
+                        selectedRegions = selectedRegions.filter(
+                            (r) => r !== region,
+                        );
                         updateSelectedRegionsInRune();
                         d3.select(`path[data-id="${region}"]`).attr(
                             "fill",
@@ -196,10 +217,10 @@
                 </Button>
             {/each}
         </div>
-        
+
         {#if selectedRegions.length === 0}
             <p class="text-muted-foreground text-sm">
-                Select an area to start geographical restriction
+                Select an area to start geographical selection.
             </p>
         {/if}
     </div>
