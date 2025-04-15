@@ -2,9 +2,11 @@
     import { dataRune } from "$lib/runes/dataRune.svelte";
     import { Button } from "$lib/components/ui/button/index.js";
     import * as Select from "$lib/components/ui/select/index.js";
-    import NutsMapSelector from "./NutsMapSelector.svelte";
+    import AreaSelector from "./AreaSelector.svelte";
     import { Separator } from "$lib/components/ui/separator/index";
     import { Slider } from "$lib/components/ui/slider";
+
+    let mode = $state<"nuts" | "lasso">("nuts");
 
     function toggleSelectAll(field: "datasetId" | "matrix" | "substances") {
         if (field === "datasetId") {
@@ -66,7 +68,30 @@
 
     <!-- <Separator /> -->
 
-    <NutsMapSelector />
+    <h3
+        class="scroll-m-20 border-b pt-3 pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0"
+    >
+        Area selection
+    </h3>
+
+    <!-- Mode de sélection -->
+    <div class="flex items-center gap-3">
+        <span class="text-sm font-medium text-muted-foreground">Mode</span>
+        <Button
+            variant={mode === "nuts" ? "default" : "outline"}
+            onclick={() => (mode = "nuts")}
+        >
+            NUTS
+        </Button>
+        <Button
+            variant={mode === "lasso" ? "default" : "outline"}
+            onclick={() => (mode = "lasso")}
+        >
+            Lasso
+        </Button>
+    </div>
+
+    <AreaSelector {mode} />
 
     <!-- <Separator /> -->
 

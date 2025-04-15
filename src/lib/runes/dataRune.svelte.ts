@@ -15,7 +15,8 @@ class DataRune {
 		yearMax: 2025 as number | null,
 		yearRange: [2000, 2025] as number[],
 		substances: [] as string[],
-		nutsRegions: [] as { year: number; level: number; id: string }[]
+		nutsRegions: [] as { year: number; level: number; id: string }[],
+		lassoSelection: [] as { lat: number; lon: number }[]
 	});
 	
 	

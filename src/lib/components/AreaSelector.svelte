@@ -3,6 +3,7 @@
     import * as Select from "$lib/components/ui/select";
     import { dataRune } from "$lib/runes/dataRune.svelte";
     import { Button } from "$lib/components/ui/button";
+    import LassoSelect from "@lucide/svelte/icons/lasso-select";
 
     let selectedYear = $state("2024");
     let selectedLevel = $state("0");
@@ -11,6 +12,7 @@
     let worldGeojson: any = null;
 
     let selectedRegions: string[] = $state([]);
+    const { mode = "nuts" }: { mode?: "nuts" | "lasso" } = $props();
 
     async function loadAndRenderMap() {
         const nutsUrl = `/data/nuts/NUTS_${selectedYear}.geojson`;
@@ -159,44 +161,40 @@
 </script>
 
 <div class="map-filter-layout">
-    <h3
-        class="scroll-m-20 border-b pt-3 pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0"
-    >
-        Area selection
-    </h3>
-
     <!-- Filtres NUTS -->
-    <div class="nuts-controls">
-        <Select.Root bind:value={selectedYear} type="single">
-            <Select.Trigger class="w-[160px]"
-                >NUTS {selectedYear}</Select.Trigger
-            >
-            <Select.Content>
-                {#each ["2016", "2021", "2024"] as y}
-                    <Select.Item value={y}>{y}</Select.Item>
-                {/each}
-            </Select.Content>
-        </Select.Root>
+    {#if mode === "nuts"}
+        <div class="nuts-controls">
+            <Select.Root bind:value={selectedYear} type="single">
+                <Select.Trigger class="w-[160px]"
+                    >NUTS {selectedYear}</Select.Trigger
+                >
+                <Select.Content>
+                    {#each ["2016", "2021", "2024"] as y}
+                        <Select.Item value={y}>{y}</Select.Item>
+                    {/each}
+                </Select.Content>
+            </Select.Root>
 
-        <Select.Root bind:value={selectedLevel} type="single">
-            <Select.Trigger class="w-[160px]"
-                >Niveau {selectedLevel}</Select.Trigger
-            >
-            <Select.Content>
-                {#each ["0", "1", "2", "3"] as l}
-                    <Select.Item value={l}>Niveau {l}</Select.Item>
-                {/each}
-            </Select.Content>
-        </Select.Root>
-    </div>
+            <Select.Root bind:value={selectedLevel} type="single">
+                <Select.Trigger class="w-[160px]"
+                    >Niveau {selectedLevel}</Select.Trigger
+                >
+                <Select.Content>
+                    {#each ["0", "1", "2", "3"] as l}
+                        <Select.Item value={l}>Niveau {l}</Select.Item>
+                    {/each}
+                </Select.Content>
+            </Select.Root>
+        </div>
+    {/if}
 
     <!-- Carte -->
-    <div class="map-stack">
+    <div class:hidden={mode !== "nuts"} class="map-stack">
         <div bind:this={container} class="map-layer"></div>
     </div>
 
     <!-- Liste des régions sélectionnées -->
-    <div class="region-list">
+    <div class:hidden={mode !== "nuts"} class="region-list">
         <div class="flex flex-wrap gap-2 pl-2">
             {#each selectedRegions as region (region)}
                 <Button
@@ -219,11 +217,23 @@
         </div>
 
         {#if selectedRegions.length === 0}
-            <p class="text-muted-foreground text-sm">
+            <p
+                class:hidden={mode !== "nuts"}
+                class="text-muted-foreground text-sm"
+            >
                 Select an area to start geographical selection.
             </p>
         {/if}
     </div>
+    <!-- UI Lasso (exemple simple pour l’instant) -->
+    {#if mode === "lasso"}
+        <div class="mt-1">
+            <Button onclick={() => null}>
+                <LassoSelect class= "mr-0.5 size-4" />
+                Toggle lasso</Button
+            >
+        </div>
+    {/if}
 </div>
 
 <style>
