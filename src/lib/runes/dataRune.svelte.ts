@@ -12,21 +12,19 @@ class DataRune {
 		category: 'Sampling',
 		datasetId: [] as number[],
 		matrix: [] as string[],
-		yearMin: 2000 as number | null,
-		yearMax: 2025 as number | null,
 		yearRange: [2000, 2025] as number[],
-		substances: [] as string[],
+		substances: [] as { name: string; range: [number, number], max: number, min: number }[],
 		nutsRegions: [] as { year: number; level: number; id: string }[],
 		lassoRegion: [] as { lat: number; lon: number }[]
 	});
 
 	lassoEnabled = $state(false);
 
-	
+
 	availableOptions = $derived(() => {
 		const currentCategory = this.filters.category;
 		const filtered = this.points.filter(p => p.category === currentCategory);
-	
+
 		const datasetCount = new Map<number, { name: string, count: number }>();
 		for (const p of filtered) {
 			const id = Number(p.dataset_id);
@@ -37,28 +35,28 @@ class DataRune {
 				datasetCount.get(id)!.count++;
 			}
 		}
-	
+
 		const datasetIds = Array.from(datasetCount.entries())
 			.map(([id, { name, count }]) => ({ id, name, count }))
 			.sort((a, b) => b.count - a.count);
-	
+
 		const matrixCount = new Map<string, number>();
 		for (const p of filtered) {
 			if (p.matrix) {
 				matrixCount.set(p.matrix, (matrixCount.get(p.matrix) ?? 0) + 1);
 			}
 		}
-	
+
 		const matrices = Array.from(matrixCount.entries())
 			.map(([name, count]) => ({ name, count }))
 			.sort((a, b) => b.count - a.count);
-	
+
 		return {
 			datasetIds,
 			matrices
 		};
 	});
-	
+
 
 
 	allSubstances = $derived(() => {
@@ -83,7 +81,9 @@ class DataRune {
 	});
 
 	filteredPoints = $derived(() =>
+		
 		this.points.filter((p) => {
+
 			const f = this.filters;
 
 			const matchCategory = f.category === 'Tous' || p.category === f.category;
@@ -97,9 +97,13 @@ class DataRune {
 			let matchSubstance = true;
 			if (f.substances.length > 0) {
 				try {
+					console.log("[dataRune] parsing pfas_values", p.pfas_values);
 					const parsed = JSON.parse(p.pfas_values ?? '[]');
-					const substancesInPoint = parsed.map((v: any) => v.substance);
-					matchSubstance = substancesInPoint.some((s: string) => f.substances.includes(s));
+					matchSubstance = f.substances.some(({ name, range }) => {
+						const value = parsed.find((v: any) => v.substance === name)?.value;
+						const val = parseFloat(value);
+						return !isNaN(val) && val >= range[0] && val <= range[1];
+					});
 				} catch {
 					matchSubstance = false;
 				}
@@ -116,8 +120,8 @@ class DataRune {
 			if (f.lassoRegion.length > 0) {
 				matchRegion = pointInPolygon(Number(p.lat), Number(p.lon), f.lassoRegion);
 			}
-			
-			
+
+
 
 			return matchCategory &&
 				matchDataset &&
@@ -126,6 +130,7 @@ class DataRune {
 				matchSubstance &&
 				matchRegion;
 		})
+		
 	);
 }
 

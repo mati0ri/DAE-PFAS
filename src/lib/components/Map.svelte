@@ -39,6 +39,8 @@
                         );
                         dataRune.filters.lassoRegion = [];
                     }
+
+                    dataRune.lassoEnabled = false;
                 });
 
                 lasso.enable();
@@ -47,6 +49,7 @@
             lasso.disable();
             map.off("lasso.finished");
             lasso = null;
+            dataRune.lassoEnabled = false;
             // dataRune.filters.lassoRegion = [];
         }
     });

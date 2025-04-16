@@ -5,8 +5,11 @@
     import AreaSelector from "./AreaSelector.svelte";
     import { Separator } from "$lib/components/ui/separator/index";
     import { Slider } from "$lib/components/ui/slider";
+    import { YearSlider } from "$lib/components/ui/yearSlider";
+    import { getSubstanceMaxMin } from "$lib/utils/getSubstanceMaxMin";
 
     let mode = $state<"nuts" | "lasso">("nuts");
+    let newSubstance = $state<string>("");
 
     function toggleSelectAll(field: "datasetId" | "matrix" | "substances") {
         if (field === "datasetId") {
@@ -22,7 +25,12 @@
         } else if (field === "substances") {
             dataRune.filters.substances =
                 dataRune.filters.substances.length === 0
-                    ? [...dataRune.allSubstances()]
+                    ? dataRune.allSubstances().map((substance) => ({
+                          name: substance,
+                          range: [0, 12345],
+                          max: 12345,
+                          min: 12,
+                      }))
                     : [];
         }
     }
@@ -31,7 +39,8 @@
         return dataRune.filters[field].length === 0;
     }
 
-    $inspect(dataRune.filters.lassoRegion);
+    $inspect(dataRune.filters.substances);
+    $inspect(dataRune.lassoEnabled);
 </script>
 
 <div class="selection">
@@ -187,7 +196,7 @@
             Year range
         </h2>
         <div class="my-4 space-y-2 pt-2">
-            <Slider
+            <YearSlider
                 type="multiple"
                 bind:value={dataRune.filters.yearRange}
                 min={2000}
@@ -204,26 +213,77 @@
         >
             Substances
         </h2>
-        <div class="checkbox-scroll">
-            <label>
-                <input
-                    type="checkbox"
-                    checked={isAllSelected("substances")}
-                    onchange={() => toggleSelectAll("substances")}
-                />
-                Toutes
-            </label>
-            {#each dataRune.allSubstances() as substance}
-                <label>
-                    <input
-                        type="checkbox"
-                        value={substance}
-                        bind:group={dataRune.filters.substances}
-                    />
-                    {substance}
-                </label>
-            {/each}
+
+        <!-- Ajouter une nouvelle substance -->
+        <div class="flex items-center gap-2 mb-3">
+            <Select.Root type="single" bind:value={newSubstance}>
+                <Select.Trigger class="w-[220px]">
+                    Ajouter substance
+                </Select.Trigger>
+                <Select.Content>
+                    {#each dataRune.allSubstances() as s}
+                        {#if !dataRune.filters.substances.some((f) => f.name === s)}
+                            <Select.Item value={s}>{s}</Select.Item>
+                        {/if}
+                    {/each}
+                </Select.Content>
+            </Select.Root>
+
+            <Button
+                onclick={() => {
+                    const res = getSubstanceMaxMin(
+                        dataRune.points,
+                        newSubstance,
+                    );
+                    const max = res.max;
+                    const min = res.min;
+                    if (!isNaN(max)) {
+                        dataRune.filters.substances = [
+                            ...dataRune.filters.substances,
+                            { name: newSubstance, range: [min, max], max, min },
+                        ];
+                    }
+                    newSubstance = "";
+                }}
+                disabled={!newSubstance}
+            >
+                Ajouter
+            </Button>
         </div>
+
+        <!-- Liste des substances sélectionnées -->
+        {#each dataRune.filters.substances as s (s.name)}
+            <div class="mb-3">
+                <div class="flex items-center justify-between mb-6">
+                    <h4 class="text-sm font-medium">{s.name}</h4>
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onclick={() => {
+                            dataRune.filters.substances =
+                                dataRune.filters.substances.filter(
+                                    (f) => f.name !== s.name,
+                                );
+                        }}
+                    >
+                        ✕
+                    </Button>
+                </div>
+
+                <Slider
+                    type="multiple"
+                    bind:value={s.range}
+                    min={s.min}
+                    max={s.max}
+                    step={1}
+                    class="mt-2"
+                />
+
+                <!-- <div class="text-xs text-muted-foreground mt-1">
+                    {Math.round(s.range[0])} – {Math.round(s.range[1])}
+                </div> -->
+            </div>
+        {/each}
     {/if}
 
     <Separator />
@@ -241,13 +301,5 @@
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
-    }
-    .checkbox-scroll {
-        max-height: 200px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        padding-right: 0.5rem;
     }
 </style>

@@ -4,6 +4,7 @@
     import { dataRune } from "$lib/runes/dataRune.svelte";
     import { Button } from "$lib/components/ui/button";
     import LassoSelect from "@lucide/svelte/icons/lasso-select";
+    import RotateCcw from "@lucide/svelte/icons/rotate-ccw";
 
     let selectedYear = $state("2024");
     let selectedLevel = $state("0");
@@ -148,6 +149,9 @@
     }
 
     function updateSelectedRegionsInRune() {
+        if (dataRune.filters.lassoRegion.length > 0) {
+            dataRune.filters.lassoRegion = [];
+        }
         dataRune.filters.nutsRegions = selectedRegions.map((id) => ({
             id,
             year: Number(selectedYear),
@@ -231,25 +235,44 @@
     <!-- UI Lasso -->
     {#if mode === "lasso"}
         <div class="mt-1 flex gap-2">
-            <Button
-                onclick={() => {
-                    if (dataRune.lassoEnabled) {
-                        dataRune.lassoEnabled = false;
-                    } else {
-                        dataRune.lassoEnabled = true;
-                        dataRune.filters.lassoRegion = [];
-                    }
-                }}
-            >
-                <LassoSelect class="mr-0.5 size-4" />
-                {dataRune.lassoEnabled ? "Cancel" : "Start"} lasso selection
-            </Button>
+            {#if dataRune.filters.lassoRegion.length === 0}
+                {#if !dataRune.lassoEnabled}
+                    <Button
+                        onclick={() => {
+                            dataRune.lassoEnabled = true;
+                            selectedRegions.forEach((region) => {
+                                d3.select(`path[data-id="${region}"]`).attr(
+                                    "fill",
+                                    "var(--color-countries)",
+                                );
+                            });
+                            selectedRegions = [];
+                            dataRune.filters.nutsRegions = [];
+                        }}
+                    >
+                        <LassoSelect class="mr-0.5 size-4" />
+                        Start lasso selection
+                    </Button>
+                {:else}
+                    <Button
+                        onclick={() => {
+                            dataRune.lassoEnabled = true;
+                        }}
+                        disabled
+                    >
+                        <LassoSelect class="mr-0.5 size-4" />
+                        Lasso selection in progress
+                    </Button>
+                {/if}
+            {/if}
 
             {#if dataRune.filters.lassoRegion.length > 0}
                 <Button
-                    variant="secondary"
+                    variant="outline"
                     onclick={() => (dataRune.filters.lassoRegion = [])}
                 >
+                    <RotateCcw class="mr-0.5 size-4" />
+
                     Reset lasso selection
                 </Button>
             {/if}
