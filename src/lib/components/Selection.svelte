@@ -31,7 +31,7 @@
         return dataRune.filters[field].length === 0;
     }
 
-    $inspect(dataRune.filters.lassoSelection);
+    $inspect(dataRune.filters.lassoRegion);
 </script>
 
 <div class="selection">

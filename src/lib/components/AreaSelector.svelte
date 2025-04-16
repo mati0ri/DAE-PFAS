@@ -230,13 +230,29 @@
 
     <!-- UI Lasso -->
     {#if mode === "lasso"}
-        <div class="mt-1">
+        <div class="mt-1 flex gap-2">
             <Button
-                onclick={() => (dataRune.lassoEnabled = !dataRune.lassoEnabled)}
+                onclick={() => {
+                    if (dataRune.lassoEnabled) {
+                        dataRune.lassoEnabled = false;
+                    } else {
+                        dataRune.lassoEnabled = true;
+                        dataRune.filters.lassoRegion = [];
+                    }
+                }}
             >
                 <LassoSelect class="mr-0.5 size-4" />
-                {dataRune.lassoEnabled ? "Reset" : "Start"} lasso selection
+                {dataRune.lassoEnabled ? "Cancel" : "Start"} lasso selection
             </Button>
+
+            {#if dataRune.filters.lassoRegion.length > 0}
+                <Button
+                    variant="secondary"
+                    onclick={() => (dataRune.filters.lassoRegion = [])}
+                >
+                    Reset lasso selection
+                </Button>
+            {/if}
         </div>
     {/if}
 </div>

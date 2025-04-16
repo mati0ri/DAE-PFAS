@@ -23,16 +23,22 @@
                 });
 
                 map.on("lasso.finished", (event: any) => {
-                    const selected = (event.layers ?? event).map((layer: any) =>
-                        layer.getLatLng(),
-                    );
+                    const rawPolygon = event?.latLngs;
 
-                    dataRune.filters.lassoSelection = selected.map(
-                        ({ lat, lng }: { lat: number; lng: number }) => ({
-                            lat,
-                            lon: lng,
-                        }),
-                    );
+                    if (Array.isArray(rawPolygon)) {
+                        dataRune.filters.lassoRegion = rawPolygon.map(
+                            ({ lat, lng }: { lat: number; lng: number }) => ({
+                                lat,
+                                lon: lng,
+                            }),
+                        );
+                    } else {
+                        console.warn(
+                            "Lasso event.latLngs not found or malformed",
+                            event,
+                        );
+                        dataRune.filters.lassoRegion = [];
+                    }
                 });
 
                 lasso.enable();
@@ -41,7 +47,7 @@
             lasso.disable();
             map.off("lasso.finished");
             lasso = null;
-            dataRune.filters.lassoSelection = [];
+            // dataRune.filters.lassoRegion = [];
         }
     });
 

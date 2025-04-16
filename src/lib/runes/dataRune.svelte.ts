@@ -1,4 +1,5 @@
 import type { PfasPoint } from '$lib/types/pfas';
+import { pointInPolygon } from '$lib/utils/pointInPolygon';
 
 class DataRune {
 	points = $state<PfasPoint[]>([]);
@@ -16,7 +17,7 @@ class DataRune {
 		yearRange: [2000, 2025] as number[],
 		substances: [] as string[],
 		nutsRegions: [] as { year: number; level: number; id: string }[],
-		lassoSelection: [] as { lat: number; lon: number }[]
+		lassoRegion: [] as { lat: number; lon: number }[]
 	});
 
 	lassoEnabled = $state(false);
@@ -112,12 +113,10 @@ class DataRune {
 					return nuts?.NUTS_ID === id;
 				});
 			}
-			if (f.lassoSelection.length > 0) {
-				matchRegion = f.lassoSelection.some(({ lat, lon }) => {
-					return Math.abs(Number(p.lat) - lat) < 0.0005 &&
-						   Math.abs(Number(p.lon) - lon) < 0.0005;
-				});
+			if (f.lassoRegion.length > 0) {
+				matchRegion = pointInPolygon(Number(p.lat), Number(p.lon), f.lassoRegion);
 			}
+			
 			
 
 			return matchCategory &&
