@@ -247,7 +247,9 @@
                                 );
                             });
                             selectedRegions = [];
-                            dataRune.filters.nutsRegions = [];
+                            if (dataRune.filters.nutsRegions.length > 0) {
+                                dataRune.filters.nutsRegions = [];
+                            }
                         }}
                     >
                         <LassoSelect class="mr-0.5 size-4" />
@@ -256,12 +258,12 @@
                 {:else}
                     <Button
                         onclick={() => {
-                            dataRune.lassoEnabled = true;
+                            dataRune.lassoEnabled = false;
                         }}
-                        disabled
+                        variant="outline"
                     >
                         <LassoSelect class="mr-0.5 size-4" />
-                        Lasso selection in progress
+                        Cancel lasso selection
                     </Button>
                 {/if}
             {/if}

@@ -305,7 +305,7 @@
     <Button
         onclick={() => map.zoomIn()}
         size="icon"
-        class="absolute top-4 left-4 z-[1001]"
+        class="absolute top-4 left-4"
         title="Zoom avant"
     >
         <Plus class="w-4 h-4" />
@@ -314,7 +314,7 @@
     <Button
         onclick={() => map.zoomOut()}
         size="icon"
-        class="absolute top-16 left-4 z-[1001]"
+        class="absolute top-16 left-4"
         title="Zoom arrière"
     >
         <Minus class="w-4 h-4" />
@@ -323,7 +323,7 @@
     <Button
         onclick={switchTileLayer}
         size="icon"
-        class="absolute top-28 left-4 z-[1001]"
+        class="absolute top-28 left-4"
         title="Changer de fond de carte"
     >
         <Map class="w-4 h-4" />
@@ -331,7 +331,7 @@
     <Button
         onclick={exportMapAsPng}
         size="icon"
-        class="absolute top-40 left-4 z-[1001]"
+        class="absolute top-40 left-4"
         title="Exporter la carte"
     >
         <ImageDown class="w-4 h-4" />

@@ -7,6 +7,7 @@
     import { Slider } from "$lib/components/ui/slider";
     import { YearSlider } from "$lib/components/ui/yearSlider";
     import { getSubstanceMaxMin } from "$lib/utils/getSubstanceMaxMin";
+    import ExportDialog from "./ExportDialog.svelte";
 
     let mode = $state<"nuts" | "lasso">("nuts");
     let newSubstance = $state<string>("");
@@ -75,15 +76,12 @@
         </Select.Root>
     {/if}
 
-    <!-- <Separator /> -->
-
     <h3
         class="scroll-m-20 border-b pt-3 pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0"
     >
         Area selection
     </h3>
 
-    <!-- Mode de sélection -->
     <div class="flex items-center gap-3">
         <span class="text-sm font-medium text-muted-foreground">Mode</span>
         <Button
@@ -101,8 +99,6 @@
     </div>
 
     <AreaSelector {mode} />
-
-    <!-- <Separator /> -->
 
     <!-- Dataset ID -->
     {#if dataRune.availableOptions().datasetIds.length}
@@ -145,8 +141,6 @@
         </div>
     {/if}
 
-    <!-- <Separator /> -->
-
     <!-- Matrix -->
     {#if dataRune.filters.category === "Sampling" && dataRune.availableOptions().matrices.length}
         <h2
@@ -187,15 +181,14 @@
         </div>
     {/if}
 
-    <!-- <Separator /> -->
-
+    <!-- Year range -->
     {#if dataRune.filters.category === "Sampling"}
         <h2
             class="scroll-m-20 border-b pt-3 pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0"
         >
             Year range
         </h2>
-        <div class="my-4 space-y-2 pt-2">
+        <div class="my-2 space-y-2">
             <YearSlider
                 type="multiple"
                 bind:value={dataRune.filters.yearRange}
@@ -209,7 +202,7 @@
     <!-- Substances -->
     {#if dataRune.filters.category === "Sampling"}
         <h2
-            class="scroll-m-20 border-b pt-3 pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0"
+            class="scroll-m-20 border-b pt-7 pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0"
         >
             Substances
         </h2>
@@ -218,7 +211,8 @@
         <div class="flex items-center gap-2 mb-3">
             <Select.Root type="single" bind:value={newSubstance}>
                 <Select.Trigger class="w-[220px]">
-                    Ajouter substance
+                    <!-- Ajouter substance ou newSubstance si defini-->
+                    {newSubstance || "Ajouter une substance"}
                 </Select.Trigger>
                 <Select.Content>
                     {#each dataRune.allSubstances() as s}
@@ -288,7 +282,9 @@
 
     <Separator />
 
-    <Button>Exporter {dataRune.filteredPoints().length} points</Button>
+    <!-- <Button>Exporter {dataRune.filteredPoints().length} points</Button> -->
+
+    <ExportDialog />
 </div>
 
 <style>

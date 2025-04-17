@@ -22,16 +22,21 @@
 		$effect(() => {
 			if (!histogramContainer) return;
 
-			const margin = { top: 0, right: 0, bottom: 0, left: 0 };
-			const width = histogramContainer.clientWidth - margin.left - margin.right;
-			const height = histogramContainer.clientHeight - margin.top - margin.bottom;
+			const margin = { top: 4, right: 4, bottom: 4, left: 4 };
+			const width =
+				histogramContainer.clientWidth - margin.left - margin.right;
+			const height =
+				histogramContainer.clientHeight - margin.top - margin.bottom;
 
 			d3.select(histogramContainer).selectAll("svg").remove();
 
 			const svg = d3
 				.select(histogramContainer)
 				.append("svg")
-				.attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+				.attr(
+					"viewBox",
+					`0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`,
+				)
 				.attr("preserveAspectRatio", "xMidYMid meet")
 				.style("width", "100%")
 				.style("height", "100%")
@@ -39,31 +44,39 @@
 				.attr("transform", `translate(${margin.left},${margin.top})`);
 
 			const yearCounts = d3.rollup(
-				dataRune.points.filter((d) => (d.year ?? null) !== null && !isNaN(+(d.year ?? 0))),
-				v => v.length,
-				d => +(d.year ?? 0)
+				dataRune.points.filter(
+					(d) => (d.year ?? null) !== null && !isNaN(+(d.year ?? 0)),
+				),
+				(v) => v.length,
+				(d) => +(d.year ?? 0),
 			);
 
-			const years = Array.from({ length: 2025 - 2000 + 1 }, (_, i) => 2000 + i);
+			const years = Array.from(
+				{ length: 2025 - 2000 + 1 },
+				(_, i) => 2000 + i,
+			);
 			const x = d3.scaleLinear().domain([2000, 2025]).range([0, width]);
 			const y = d3
 				.scaleLinear()
-				.domain([0, d3.max(years.map((y) => yearCounts.get(y) ?? 0)) ?? 1])
+				.domain([
+					0,
+					d3.max(years.map((y) => yearCounts.get(y) ?? 0)) ?? 1,
+				])
 				.range([height, 0]);
 
-			const area = d3
-				.area<number>()
+			const line = d3
+				.line<number>()
 				.x((d) => x(d))
-				.y0(height)
-				.y1((d) => y(yearCounts.get(d) ?? 0))
+				.y((d) => y(yearCounts.get(d) ?? 0))
 				.curve(d3.curveMonotoneX);
 
-			svg
-				.append("path")
+			svg.append("path")
 				.datum(years)
-				.attr("fill", "var(--primary)")
-				.attr("fill-opacity", 0.15)
-				.attr("d", area);
+				.attr("fill", "none")
+				.attr("stroke", "hsl(var(--primary))")
+				.attr("stroke-width", 1.5)
+				.attr("stroke-opacity", 0.5)
+				.attr("d", line);
 		});
 	});
 </script>
